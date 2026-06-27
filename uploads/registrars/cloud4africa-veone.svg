@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+    <defs>
+      <linearGradient id="grad19" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="#7209B7" />
+        <stop offset="100%" stopColor="#9D4EDD" />
+      </linearGradient>
+      <filter id="shadow19">
+        <feDropShadow dx="0" dy="4" stdDeviation="4" flood-opacity="0.3"/>
+      </filter>
+    </defs>
+    <rect width="200" height="200" rx="40" fill="url(#grad19)" />
+    <circle cx="100" cy="100" r="70" fill="white" opacity="0.1" />
+    <text x="100" y="125" font-family="Arial, sans-serif" font-weight="900" font-size="90" fill="white" text-anchor="middle" filter="url(#shadow19)">Cl</text>
+  </svg>

@@ -1,0 +1,211 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id         Int       @id @default(autoincrement())
+  first_name String
+  last_name  String
+  email      String    @unique
+  password   String
+  phone      String?
+  role       String    @default("admin")
+  job_title  String?
+  avatar     String?
+  is_active  Boolean   @default(true)
+  last_login DateTime?
+  password_changed_at DateTime?
+  language       String?   @default("fr")
+  theme          String?   @default("light")
+  default_admin_page String? @default("dashboard")
+  created_at DateTime  @default(now())
+  updated_at   DateTime      @updatedAt
+  news         News[]
+  documents    Document[]
+  activityLogs ActivityLog[]
+  assigned_tickets SupportTicket[] @relation("TicketAssignee")
+
+  @@map("users")
+}
+
+model News {
+  id           Int       @id @default(autoincrement())
+  title        String
+  slug         String    @unique
+  summary      String    @db.Text
+  content      String    @db.LongText
+  category     String
+  image_url    String?   @db.Text
+  status       String    @default("Brouillon")
+  author_id    Int
+  author       User      @relation(fields: [author_id], references: [id])
+  published_at DateTime?
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
+  @@map("news")
+}
+
+model Document {
+  id               Int       @id @default(autoincrement())
+  title            String
+  description      String    @db.Text
+  category         String
+  file_name        String
+  file_url         String
+  file_type        String
+  file_size        String
+  status           String    @default("Publié")
+  version          String    @default("1.0")
+  featured         Boolean   @default(false)
+  downloads        Int       @default(0)
+  last_download_at DateTime?
+  created_by       Int
+  author           User      @relation(fields: [created_by], references: [id])
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+
+  @@map("documents")
+}
+
+model ActivityLog {
+  id          Int      @id @default(autoincrement())
+  action      String
+  entity_type String
+  entity_id   Int?
+  details     String?  @db.Text
+  user_id     Int
+  user        User     @relation(fields: [user_id], references: [id])
+  created_at  DateTime @default(now())
+
+  @@map("activity_logs")
+}
+
+model Registrar {
+  id               Int       @id @default(autoincrement())
+  name             String
+  slug             String    @unique
+  logo             String?   @db.Text
+  description      String?   @db.Text
+  website          String?
+  email            String?
+  phone            String?
+  support_email    String?
+  support_phone    String?
+  country          String?
+  city             String?
+  address          String?   @db.Text
+  status           String    @default("Actif")
+  featured         Boolean   @default(false)
+  accredited_since DateTime?
+  domains_count    Int       @default(0)
+  order_position   Int       @default(0)
+  type             String?
+  created_at       DateTime  @default(now())
+  updated_at       DateTime  @updatedAt
+
+  @@map("registrars")
+}
+
+model DomainSearchLog {
+  id          Int      @id @default(autoincrement())
+  domain      String
+  available   Boolean
+  searched_at DateTime @default(now())
+
+  @@map("domain_search_logs")
+}
+
+model SupportTicket {
+  id           Int             @id @default(autoincrement())
+  ticket_number String         @unique
+  name         String
+  email        String
+  phone        String?
+  organization String?
+  category     String
+  priority     String
+  subject      String
+  description  String          @db.Text
+  domain       String?
+  attachment   String?         @db.Text
+  status       String          @default("Nouveau")
+  assigned_to  Int?
+  assignee     User?           @relation("TicketAssignee", fields: [assigned_to], references: [id])
+  first_response_at DateTime?
+  resolved_at       DateTime?
+  processing_time_minutes Int?
+  created_at   DateTime        @default(now())
+  updated_at   DateTime        @updatedAt
+  messages     TicketMessage[]
+  histories    TicketHistory[]
+
+  @@map("support_tickets")
+}
+
+model TicketMessage {
+  id         Int           @id @default(autoincrement())
+  ticket_id  Int
+  ticket     SupportTicket @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
+  sender     String        @default("admin") // "user" ou "admin"
+  message    String        @db.Text
+  created_at DateTime      @default(now())
+
+  @@map("ticket_messages")
+}
+
+model TicketHistory {
+  id         Int           @id @default(autoincrement())
+  ticket_id  Int
+  ticket     SupportTicket @relation(fields: [ticket_id], references: [id], onDelete: Cascade)
+  action     String
+  author     String
+  details    String?       @db.Text
+  created_at DateTime      @default(now())
+
+  @@map("ticket_histories")
+}
+
+model SiteSetting {
+  id            Int      @id @default(autoincrement())
+  site_name     String?  @default("NIC.CI")
+  site_slogan   String?  @db.Text
+  logo_url      String?  @db.Text
+  favicon_url   String?  @db.Text
+  support_email String?
+  contact_email String?
+  phone         String?
+  address       String?  @db.Text
+  facebook_url      String?
+  linkedin_url      String?
+  twitter_url       String?
+  youtube_url       String?
+  footer_text       String?  @db.Text
+  
+  hero_title        String?
+  hero_subtitle     String?  @db.Text
+  hero_button_text  String?
+  about_title       String?
+  about_description String?  @db.Text
+
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  @@map("site_settings")
+}
+
+model SupportReport {
+  id           Int      @id @default(autoincrement())
+  title        String
+  period       String
+  generated_by String
+  file_url     String   @db.Text
+  created_at   DateTime @default(now())
+
+  @@map("support_reports")
+}
